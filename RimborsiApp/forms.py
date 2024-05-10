@@ -1,7 +1,7 @@
 from comuni_italiani import models as comuni_italiani_models
 from crispy_forms.bootstrap import Div, InlineCheckboxes
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Column, Fieldset, Layout, Row, Submit
+from crispy_forms.layout import Column, Fieldset, Layout, Row, Submit, HTML
 from dal import autocomplete
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -78,30 +78,37 @@ class ForeignProfileForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Update'))
 
         self.helper.layout = Layout(
-            Row(Column('nome', css_class="col-6"), Column('cognome', css_class="col-6")),
-            Row(Column('data_nascita', css_class="col-3"), Column('luogo_nascita_straniero', css_class="col-3"),
-                Column('cf', css_class="col-3"), Column('sesso', css_class="col-3")),
+            Row(Column('nome', css_class='col-sm-6'), Column('cognome', css_class='col-sm-6')),
+            Row(Column('data_nascita', css_class='col-lg-3 col-sm-6'), Column('luogo_nascita_straniero', css_class='col-lg-3 col-sm-6'),
+                Column('cf', css_class='col-lg-3 col-sm-6'), Column('sesso', css_class='col-lg-3 col-sm-6')),
+
+            HTML('<br>'),
+
             Fieldset("Residence", Row(
-                Column('residenza_via', css_class='col-4'),
-                Column('residenza_n', css_class='col-2'),
-                Column('residenza_comune', css_class='col-3'),
-                Column('residenza_provincia', css_class='col-3'), css_id='residenza-row')),
+                Column('residenza_via', css_class='col-lg-4 col-sm-8'),
+                Column('residenza_n', css_class='col-lg-2 col-3'),
+                Column('residenza_comune', css_class='col-lg-3 col-sm-6'),
+                Column('residenza_provincia', css_class='col-lg-3 col-sm-6'), css_id='residenza-row')),
+
+            HTML('<br>'),
 
             Fieldset("Domicile", Row(
-                Column('domicilio_via', css_class='col-4'),
-                Column('domicilio_n', css_class='col-2'),
-                Column('domicilio_comune', css_class='col-3'),
-                Column('domicilio_provincia', css_class='col-3'), css_id='domicilio-row'), css_id='domicilio-fieldset'),
+                Column('domicilio_via', css_class='col-lg-4 col-sm-8'),
+                Column('domicilio_n', css_class='col-lg-2 col-3'),
+                Column('domicilio_comune', css_class='col-lg-3 col-sm-6'),
+                Column('domicilio_provincia', css_class='col-lg-3 col-sm-6'), css_id='domicilio-row'), css_id='domicilio-fieldset'),
+
+            HTML('<br>'),
 
             Fieldset("Working position",
                      Row(
-                         Column('qualifica', css_class="col-6"),
-                         Column('datore_lavoro', css_class="col-6")),
-                     Row(Column('telefono', css_class="col-6"),
-                         Column('data_fine_rapporto', css_class="col-6")),
-                     Row(Column('tutor', css_class="col-4"),
-                         Column('anno_dottorato', css_class="col-2"),
-                         Column('scuola_dottorato', css_class="col-6"), css_id="dottorando-details"),
+                         Column('qualifica', css_class='col-md-6'),
+                         Column('datore_lavoro', css_class='col-md-6')),
+                     Row(Column('telefono', css_class='col-lg-6'),
+                         Column('data_fine_rapporto', css_class='col-lg-6')),
+                     Row(Column('tutor', css_class='col-lg-4'),
+                         Column('anno_dottorato', css_class='col-lg-2'),
+                         Column('scuola_dottorato', css_class='col-lg-6'), css_id='dottorando-details'),
                      )
         )
 
@@ -191,30 +198,37 @@ class ProfileForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Aggiorna'))
 
         self.helper.layout = Layout(
-            Row(Column('nome', css_class="col-6"), Column('cognome', css_class="col-6")),
-            Row(Column('data_nascita', css_class="col-3"), Column('luogo_nascita', css_class="col-3"),
-                Column('cf', css_class="col-3"), Column('sesso', css_class="col-3")),
+            Row(Column('nome', css_class='col-sm-6'), Column('cognome', css_class='col-sm-6')),
+            Row(Column('data_nascita', css_class='col-lg-3 col-sm-6'), Column('luogo_nascita', css_class='col-lg-3 col-sm-6'),
+                Column('cf', css_class='col-lg-3 col-sm-6'), Column('sesso', css_class='col-lg-3 col-sm-6')),
+
+            HTML('<br>'),
+
             Fieldset("Residenza", Row(
-                Column('residenza_via', css_class='col-4'),
-                Column('residenza_n', css_class='col-2'),
-                Column('residenza_comune', css_class='col-3'),
-                Column('residenza_provincia', css_class='col-3'), css_id='residenza-row')),
+                Column('residenza_via', css_class='col-lg-4 col-sm-8'),
+                Column('residenza_n', css_class='col-lg-2 col-3'),
+                Column('residenza_comune', css_class='col-lg-3 col-sm-6'),
+                Column('residenza_provincia', css_class='col-lg-3 col-sm-6'), css_id='residenza-row')),
+
+            HTML('<br>'),
 
             Fieldset("Domicilio", Row(
-                Column('domicilio_via', css_class='col-4'),
-                Column('domicilio_n', css_class='col-2'),
-                Column('domicilio_comune', css_class='col-3'),
-                Column('domicilio_provincia', css_class='col-3'), css_id='domicilio-row'), css_id='domicilio-fieldset'),
+                Column('domicilio_via', css_class='col-lg-4 col-sm-8'),
+                Column('domicilio_n', css_class='col-lg-2 col-3'),
+                Column('domicilio_comune', css_class='col-lg-3 col-sm-6'),
+                Column('domicilio_provincia', css_class='col-lg-3 col-sm-6'), css_id='domicilio-row'), css_id='domicilio-fieldset'),
+
+            HTML('<br>'),
 
             Fieldset("Posizione lavorativa",
                      Row(
-                         Column('qualifica', css_class="col-6"),
-                         Column('datore_lavoro', css_class="col-6")),
-                     Row(Column('telefono', css_class="col-6"),
-                         Column('data_fine_rapporto', css_class="col-6")),
-                     Row(Column('tutor', css_class="col-4"),
-                         Column('anno_dottorato', css_class="col-2"),
-                         Column('scuola_dottorato', css_class="col-6"), css_id="dottorando-details"),
+                         Column('qualifica', css_class='col-md-6'),
+                         Column('datore_lavoro', css_class='col-md-6')),
+                     Row(Column('telefono', css_class='col-lg-6'),
+                         Column('data_fine_rapporto', css_class='col-lg-6')),
+                     Row(Column('tutor', css_class='col-lg-4'),
+                         Column('anno_dottorato', css_class='col-lg-2'),
+                         Column('scuola_dottorato', css_class='col-lg-6'), css_id='dottorando-details'),
                      )
         )
 
