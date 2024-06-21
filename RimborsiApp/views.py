@@ -234,6 +234,9 @@ def general_profile(request, profile_form, page, is_straniero):
         afs = automobile_formset(instance=request.user, queryset=automobili)
         return render(request, page, {'profile_form': profile_form,
                                       'automobili_formset': afs})
+        #return render(request, page, {'profile_form': profile_form, 'desktop_layout': profile_form.helper.layout,
+        #                              'mobile_layout': profile_form.helper.layout_mobile
+        #                              'automobili_formset': afs})
 
     elif request.method == 'POST':
         #profile_form = ProfileForm(request.POST, instance=profile)
