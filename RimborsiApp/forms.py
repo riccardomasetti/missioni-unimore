@@ -300,7 +300,7 @@ class MissioneForm(forms.ModelForm):
             _ = kwargs['instance']
             self.helper.add_input(Submit('submit', 'Aggiorna'))
         except KeyError:
-            self.helper.add_input(Submit('submit', 'Crea', style='margin-bottom: 30px;'))
+            self.helper.add_input(Submit('submit', 'Crea'))
 
         self.helper.layout = Layout(
             Row(Div('citta_destinazione', css_class="col-sm-6"), Div('stato_destinazione', css_class="col-sm-6")),
@@ -309,8 +309,8 @@ class MissioneForm(forms.ModelForm):
             Row(Div('fondo', css_class="col-lg-3 col-sm-6"), Div('struttura_fondi', css_class="col-lg-3 col-sm-6"),
                 Div('tipo', css_class="col-lg-3 col-sm-6"), Div('anticipo', css_class="col-lg-3 col-sm-6")),
             Row(Div('motivazione', css_class="col-12")),
-            Row(Div(InlineCheckboxes('mezzi_previsti'), css_class="col-6"), Div('automobile', css_class="col-6"),
-                Div('automobile_altrui', css_class="col-6")),
+            Row(Div(InlineCheckboxes('mezzi_previsti'), css_class="col-12 m-2 p-2"), Div('automobile', css_class="col-sm-12 col-md-6"),
+                Div('automobile_altrui', css_class="col-12")),
             Row(Div(InlineCheckboxes('motivazione_automobile'), css_class="col-12")),
         )
 
