@@ -63,9 +63,15 @@
                     // insert an <li> after the last list item:
                     row.append('<li><a class="' + options.deleteCssClass + '" href="javascript:void(0)">' + options.deleteText + '</a></li>');
                 } else {
-                    // Otherwise, just insert the remove button as the
-                    // last child element of the form's container:
-                    row.append('<a class="' + options.deleteCssClass + '" href="javascript:void(0)">' + options.deleteText + '</a>');
+                    // Creare il pulsante di eliminazione
+                    var deleteButton = $('<a class="' + options.deleteCssClass + ' btn btn-danger" href="javascript:void(0)">' + options.deleteText + '</a>');
+
+                    // Creare un contenitore per il pulsante di eliminazione
+                    var deleteContainer = $('<div class="mx-1" style="margin-top: 28px"></div>');
+                    deleteContainer.append(deleteButton);
+
+                    // Aggiungere il contenitore con il pulsante di eliminazione alla riga del form
+                    row.find('.card-body').append(deleteContainer);
                 }
                 // Check if we're under the minimum number of forms - not to display delete link at rendering
                 // if (!showDeleteLinks()) {
@@ -235,3 +241,4 @@
         ifdelete: true,
     };
 })(jQuery);
+
