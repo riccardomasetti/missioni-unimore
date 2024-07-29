@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.forms.models import formset_factory, inlineformset_factory
 
 from .models import *
-
+from .widgets import CustomClearableFileInput
 
 class ForeignProfileForm(forms.ModelForm):
     nome = forms.CharField(max_length=30, label='Name')
@@ -369,6 +369,7 @@ class TrasportoForm(forms.ModelForm):
     class Meta:
         model = Trasporto
         fields = '__all__'
+        #exclude = ["img_scontrino"]
         widgets = {
             'data': forms.DateInput(
                 attrs={'type': 'date', 'class': 'form-control form-control-sm', 'required': 'required', }),
@@ -382,6 +383,8 @@ class TrasportoForm(forms.ModelForm):
             #     attrs={'class': 'form-control trasporti-costo', 'required': 'required', }),
             'valuta': forms.Select(attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}),
             'km': forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'step': 0.01}),
+            'img_scontrino': CustomClearableFileInput(attrs={'class': 'form-control form-control-sm', 'id': 'img_scontrino_input'}),
+            #'img_scontrino': forms.ClearableFileInput(attrs={'class': 'form-control form-control-sm', 'id': 'img_scontrino_input'}),
         }
         labels = {
             'costo': 'Spesa',

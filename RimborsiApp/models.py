@@ -3,6 +3,7 @@ import datetime
 from codicefiscale import codicefiscale
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from RimborsiApp.storage import OverwriteStorage
@@ -289,6 +290,7 @@ class Trasporto(models.Model):
     costo = models.FloatField()
     valuta = models.CharField(max_length=3, choices=VALUTA_CHOICES, default="EUR")
     km = models.FloatField(null=True, blank=True)
+    img_scontrino = models.ImageField(upload_to='trasporti/', null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Trasporti"
@@ -377,7 +379,7 @@ def save_user_profile(sender, instance, **kwargs):
 class ModuliMissione(models.Model):
     missione = models.OneToOneField(Missione, on_delete=models.CASCADE)
 
-    anticipo = models.DateField()
+    anticipo = models.DateField(null=True, blank=True)
     parte_1 = models.DateField()
     parte_2 = models.DateField()
     kasko = models.DateField()

@@ -517,7 +517,7 @@ def salva_pernottamenti(request, id):
 def salva_trasporti(request, id):
     if request.method == 'POST':
         missione = Missione.objects.get(id=id)
-        trasporti_formset = trasporto_formset(request.POST, instance=missione)
+        trasporti_formset = trasporto_formset(request.POST, request.FILES, instance=missione)
         if trasporti_formset.is_valid():
             trasporti_formset.save()
             return redirect('RimborsiApp:missione', id)

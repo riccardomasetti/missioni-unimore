@@ -30,7 +30,7 @@ urlpatterns = [
     path('comuni_italiani/', include('comuni_italiani.urls', namespace='comuni_italiani')),
     path('ac/comuni/', include('comuni_italiani.autocomplete.urls')),
     path('shibboleth/', include('shibboleth.urls')),
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
