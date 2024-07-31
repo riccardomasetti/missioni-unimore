@@ -200,6 +200,12 @@ MOTIVAZIONE_AUTO_CHOICES = (
     # (7, "Vuoto"),
 )
 
+TIPO_SCONTRINO_CHOICES = (
+    ("PASTO", "PASTO"),
+    ("PERNOTTAMENTO", "PERNOTTAMENTO"),
+    ("ALTRO", "ALTRO"),
+    ("CONVEGNO", "CONVEGNO"),
+)
 
 class Automobile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -236,6 +242,17 @@ class Stato(models.Model):
     class Meta:
         verbose_name_plural = "Stati"
 
+class Spesa(models.Model):
+    data = models.DateField()
+    importo = models.FloatField()
+    valuta = models.CharField(max_length=3, choices=VALUTA_CHOICES, default="EUR")
+    descrizione = models.CharField(max_length=100, null=True, blank=True)
+    #delete = models.BooleanField()
+    img_scontrino = models.ImageField(upload_to='spese/', null=True, blank=True)
+    class Meta:
+        verbose_name = "Spesa"
+        verbose_name_plural = "Spese"
+
 
 class Missione(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -255,6 +272,7 @@ class Missione(models.Model):
 
     scontrino = models.TextField(null=True, blank=True)
     pernottamento = models.TextField(null=True, blank=True)
+    pernottamenti = models.ManyToManyField(Spesa, through='SpesaMissione')
     convegno = models.TextField(null=True, blank=True)
     altrespese = models.TextField(null=True, blank=True)
 
@@ -278,6 +296,15 @@ class Missione(models.Model):
 
     def __str__(self):
         return f'{self.inizio} - {self.stato_destinazione} - {self.citta_destinazione}'
+
+class SpesaMissione(models.Model):
+    missione = models.ForeignKey(Missione, on_delete=models.CASCADE)
+    spesa = models.ForeignKey(Spesa, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=13, choices=TIPO_SCONTRINO_CHOICES)
+
+    class Meta:
+        verbose_name = "Spesa Missione"
+        verbose_name_plural = "Spese Missione"
 
 
 class Trasporto(models.Model):
