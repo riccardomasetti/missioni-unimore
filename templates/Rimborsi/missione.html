@@ -42,23 +42,27 @@
          <hr>
 
         <h3>Pernottamenti:</h3>
-        <form action="{% url 'RimborsiApp:salva_pernottamenti' id=missione.id %}" method="post">{% csrf_token %}
+        <form action="{% url 'RimborsiApp:salva_pernottamenti' id=missione.id %}" method="post" enctype="multipart/form-data">{% csrf_token %}
             {{ pernottamenti_formset.management_form }}
             <div id="pernottamenti-formset-container">
                 {% for form in pernottamenti_formset.forms %}
                     <div class="card-lg-inline mb-5 mb-md-3 pernottamenti_formset_row text-black"
                          style="background-color: whitesmoke; padding: 15px; border: 1px solid #ccc;">
                         <div class="card-body d-lg-flex">
-                            {% if forloop.first %}
-                                {% for hidden in form.hidden_fields %}
-                                    {{ hidden }}
-                                {% endfor %}
-                            {% endif %}
                             {% for field in form.visible_fields %}
                                 <div class="form-group mx-1 flex-grow-1">
+                                    {% if forloop.first %}
+                                        {% for hidden in form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if field.name == 'img_scontrino' %}
+                                        {{ field }}
+                                    {% else %}
                                     <label for="{{ field.id_for_label }}">{{ field.label|capfirst }}</label>
                                     {{ field.errors.as_ul }}
                                     {{ field }}
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>

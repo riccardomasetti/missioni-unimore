@@ -242,13 +242,21 @@ class Stato(models.Model):
     class Meta:
         verbose_name_plural = "Stati"
 
+
+def profile_type_path(instance, filename):
+    spesa_missione = SpesaMissione.objects.filter(spesa=instance).first()
+    tipo_scontrino = spesa_missione.tipo if spesa_missione else 'GENERICO'
+    user_id = spesa_missione.missione.user.id if spesa_missione else 'unknown_user'
+    id_missione = spesa_missione.missione.id if spesa_missione else 'unknown_mission'
+    return f'users/{user_id}/{id_missione}/{tipo_scontrino}/{filename}'
 class Spesa(models.Model):
     data = models.DateField()
     importo = models.FloatField()
     valuta = models.CharField(max_length=3, choices=VALUTA_CHOICES, default="EUR")
     descrizione = models.CharField(max_length=100, null=True, blank=True)
     #delete = models.BooleanField()
-    img_scontrino = models.ImageField(upload_to='spese/', null=True, blank=True)
+    #img_scontrino = models.ImageField(upload_to='spese/', null=True, blank=True)
+    img_scontrino = models.ImageField(upload_to=profile_type_path, null=True, blank=True)
     class Meta:
         verbose_name = "Spesa"
         verbose_name_plural = "Spese"
@@ -271,7 +279,7 @@ class Missione(models.Model):
     anticipo = models.FloatField(null=True, blank=True, default=0)
 
     scontrino = models.TextField(null=True, blank=True)
-    pernottamento = models.TextField(null=True, blank=True)
+    #pernottamento = models.TextField(null=True, blank=True)
     pernottamenti = models.ManyToManyField(Spesa, through='SpesaMissione')
     convegno = models.TextField(null=True, blank=True)
     altrespese = models.TextField(null=True, blank=True)

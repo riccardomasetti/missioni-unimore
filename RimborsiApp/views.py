@@ -102,14 +102,14 @@ def resoconto_data(missione):
 
     db_dict = {
         'scontrino': [('s1', 'v1'), ('s2', 'v2'), ('s3', 'v3')],
-        'pernottamento': [('s1', 'v1')],
+        #'pernottamento': [('s1', 'v1')],
         'convegno': [('s1', 'v1')],
         'altrespese': [('s1', 'v1')],
     }
 
     totali_base = {
         'scontrino': 0.,
-        'pernottamento': 0.,
+        #'pernottamento': 0.,
         'convegno': 0.,
         'altrespese': 0.,
         'trasporto': 0,
@@ -413,7 +413,7 @@ def missione(request, id):
 
         db_dict = {
             'scontrino': [],  # pasti
-            'pernottamento': [],
+           # 'pernottamento': [],
             'convegno': [],
             'altrespese': [],
         }
@@ -435,8 +435,12 @@ def missione(request, id):
         pasti_sorted = sorted(db_dict['scontrino'], key=lambda k: k['data'])
         pasti_formset = scontrino_formset(initial=pasti_sorted, prefix='pasti')
 
-        pernottamenti_sorted = sorted(db_dict['pernottamento'], key=lambda k: k['data'])
-        pernottamenti_formset = scontrino_extra_formset(initial=pernottamenti_sorted, prefix='pernottamenti')
+        #pernottamenti_sorted = sorted(db_dict['pernottamento'], key=lambda k: k['data'])
+        #pernottamenti_formset = scontrino_extra_formset(initial=pernottamenti_sorted, prefix='pernottamenti')
+
+        # Caricare il formset per pernottamenti
+        pernottamenti_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Pernottamento')
+        pernottamenti_formset = spesa_formset(queryset=pernottamenti_qs.order_by('data'), prefix='pernottamenti')
 
         trasporti = Trasporto.objects.filter(missione=missione)
         trasporti_formset = trasporto_formset(instance=missione, queryset=trasporti.order_by('data'))
@@ -496,23 +500,47 @@ def salva_pasti(request, id):
     else:
         raise Http404
 
+#per commentare blocco: Ctrl + Alt + /
+# @login_required
+# def salva_pernottamenti(request, id):
+#     if request.method == 'POST':
+#         missione = Missione.objects.get(user=request.user, id=id)
+#         pernottamenti_formset = scontrino_extra_formset(request.POST, prefix='pernottamenti')
+#         if pernottamenti_formset.is_valid():
+#             pernottamenti = [f.cleaned_data for f in pernottamenti_formset.forms if f.cleaned_data != {}
+#                              and not f.cleaned_data['DELETE']]
+#             missione.pernottamento = json.dumps(pernottamenti, cls=DjangoJSONEncoder)
+#             missione.save()
+#             return redirect('RimborsiApp:missione', id)
+#         else:
+#             return HttpResponseServerError('Form non valido')
+#     else:
+#         raise Http404
 
 @login_required
 def salva_pernottamenti(request, id):
     if request.method == 'POST':
         missione = Missione.objects.get(user=request.user, id=id)
-        pernottamenti_formset = scontrino_extra_formset(request.POST, prefix='pernottamenti')
+        pernottamenti_formset = spesa_formset(request.POST, request.FILES, prefix='pernottamenti')
         if pernottamenti_formset.is_valid():
-            pernottamenti = [f.cleaned_data for f in pernottamenti_formset.forms if f.cleaned_data != {}
-                             and not f.cleaned_data['DELETE']]
-            missione.pernottamento = json.dumps(pernottamenti, cls=DjangoJSONEncoder)
-            missione.save()
+            for form in pernottamenti_formset.forms:
+                if form.cleaned_data.get('DELETE'):
+                    form.instance.delete()
+                    SpesaMissione.objects.filter(spesa=form.instance).delete()
+                else:
+                    img_scontrino = form.instance.img_scontrino
+                    form.instance.img_scontrino = None
+                    instance = form.save(commit=False)
+                    instance.save()
+                    SpesaMissione.objects.update_or_create(missione=missione, spesa=instance, tipo='PERNOTTAMENTO')
+                    if img_scontrino:
+                        instance.img_scontrino = img_scontrino
+                        instance.save()
             return redirect('RimborsiApp:missione', id)
         else:
             return HttpResponseServerError('Form non valido')
     else:
-        raise Http404
-
+        return HttpResponseBadRequest()
 
 @login_required
 def salva_trasporti(request, id):

@@ -5,7 +5,7 @@ from crispy_forms.layout import Column, Fieldset, Layout, Row, Submit, HTML
 from dal import autocomplete
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.forms.models import formset_factory, inlineformset_factory
+from django.forms.models import formset_factory, inlineformset_factory, modelformset_factory
 
 from .models import *
 from .widgets import CustomClearableFileInput
@@ -253,7 +253,7 @@ class MissioneForm(forms.ModelForm):
     class Meta:
         model = Missione
         fields = '__all__'
-        exclude = ('user', 'scontrino', 'pernottamento', 'altrespese')
+        exclude = ('user', 'scontrino', 'pernottamento', 'pernottamenti', 'altrespese')
 
         widgets = {
             'inizio': forms.DateInput(attrs={'type': 'date'}),
@@ -364,6 +364,20 @@ class ScontrinoExtraForm(forms.Form):
     d1 = forms.CharField(required=False, label=desc_label,
                          widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }), )
 
+
+class SpesaForm(forms.ModelForm):
+    class Meta:
+        model = Spesa
+        fields ='__all__'
+        #fields = ['data', 'importo', 'valuta', 'descrizione', 'img_scontrino']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm', 'required': 'required',}),
+            'importo': forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'required': 'required',}),
+            'valuta': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'descrizione': forms.TextInput(attrs={'class': 'form-control form-control-sm'}),
+            #'img_scontrino': forms.ClearableFileInput(attrs={'class': 'form-control form-control-sm'}),
+            'img_scontrino': CustomClearableFileInput(attrs={'class': 'form-control form-control-sm', 'id': 'img_scontrino_input'}),
+        }
 
 class TrasportoForm(forms.ModelForm):
     class Meta:
@@ -546,3 +560,13 @@ trasporto_formset = inlineformset_factory(Missione, Trasporto, TrasportoForm, ex
                                           fields='__all__', min_num=1)
 scontrino_formset = formset_factory(ScontrinoForm, extra=0)
 scontrino_extra_formset = formset_factory(ScontrinoExtraForm, can_delete=True, extra=0, min_num=1)
+
+#spesa_formset = inlineformset_factory(SpesaMissione, Spesa, form=SpesaForm, extra=1, can_delete=True,
+#                                     fk_name='spesa')
+
+spesa_formset = modelformset_factory(
+    Spesa,
+    form=SpesaForm,
+    extra=0,
+    can_delete=True, min_num=1
+)
