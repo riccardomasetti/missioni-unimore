@@ -102,14 +102,14 @@ def resoconto_data(missione):
 
     db_dict = {
         'scontrino': [('s1', 'v1'), ('s2', 'v2'), ('s3', 'v3')],
-        #'pernottamento': [('s1', 'v1')],
+        'pernottamento': [('s1', 'v1')],
         'convegno': [('s1', 'v1')],
         'altrespese': [('s1', 'v1')],
     }
 
     totali_base = {
         'scontrino': 0.,
-        #'pernottamento': 0.,
+        'pernottamento': 0.,
         'convegno': 0.,
         'altrespese': 0.,
         'trasporto': 0,
@@ -414,8 +414,8 @@ def missione(request, id):
         db_dict = {
             'scontrino': [],  # pasti
            # 'pernottamento': [],
-            'convegno': [],
-            'altrespese': [],
+           # 'convegno': [],
+           # 'altrespese': [],
         }
 
         # Load the default values for each field in db_dict
@@ -445,11 +445,17 @@ def missione(request, id):
         trasporti = Trasporto.objects.filter(missione=missione)
         trasporti_formset = trasporto_formset(instance=missione, queryset=trasporti.order_by('data'))
 
-        convegni_sorted = sorted(db_dict['convegno'], key=lambda k: k['data'])
-        convegni_formset = scontrino_extra_formset(initial=convegni_sorted, prefix='convegni')
+        #convegni_sorted = sorted(db_dict['convegno'], key=lambda k: k['data'])
+        #convegni_formset = scontrino_extra_formset(initial=convegni_sorted, prefix='convegni')
 
-        altrespese_sorted = sorted(db_dict['altrespese'], key=lambda k: k['data'])
-        altrespese_formset = scontrino_extra_formset(initial=altrespese_sorted, prefix='altrespese')
+        convegni_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Convegno')
+        convegni_formset = spesa_formset(queryset=convegni_qs.order_by('data'), prefix='convegni')
+
+        #altrespese_sorted = sorted(db_dict['altrespese'], key=lambda k: k['data'])
+        #altrespese_formset = scontrino_extra_formset(initial=altrespese_sorted, prefix='altrespese')
+
+        altrespese_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Altro')
+        altrespese_formset = spesa_formset(queryset=altrespese_qs.order_by('data'), prefix='altrespese')
 
         response = {
             'missione': missione,
@@ -556,39 +562,87 @@ def salva_trasporti(request, id):
         return HttpResponseBadRequest()
 
 
+# @login_required
+# def salva_altrespese(request, id):
+#     if request.method == 'POST':
+#         missione = Missione.objects.get(user=request.user, id=id)
+#         altrespese_formset = scontrino_extra_formset(request.POST, prefix='altrespese')
+#         if altrespese_formset.is_valid():
+#             altrespese = [f.cleaned_data for f in altrespese_formset.forms if f.cleaned_data != {}
+#                           and not f.cleaned_data['DELETE']]
+#             missione.altrespese = json.dumps(altrespese, cls=DjangoJSONEncoder)
+#             missione.save()
+#             return redirect('RimborsiApp:missione', id)
+#         else:
+#             return HttpResponseServerError('Form non valido')
+#     else:
+#         raise Http404
+
 @login_required
 def salva_altrespese(request, id):
     if request.method == 'POST':
         missione = Missione.objects.get(user=request.user, id=id)
-        altrespese_formset = scontrino_extra_formset(request.POST, prefix='altrespese')
+        altrespese_formset = spesa_formset(request.POST, request.FILES, prefix='altrespese')
         if altrespese_formset.is_valid():
-            altrespese = [f.cleaned_data for f in altrespese_formset.forms if f.cleaned_data != {}
-                          and not f.cleaned_data['DELETE']]
-            missione.altrespese = json.dumps(altrespese, cls=DjangoJSONEncoder)
-            missione.save()
+            for form in altrespese_formset.forms:
+                if form.cleaned_data.get('DELETE'):
+                    form.instance.delete()
+                    SpesaMissione.objects.filter(spesa=form.instance).delete()
+                else:
+                    img_scontrino = form.instance.img_scontrino
+                    form.instance.img_scontrino = None
+                    instance = form.save(commit=False)
+                    instance.save()
+                    SpesaMissione.objects.update_or_create(missione=missione, spesa=instance, tipo='ALTRO')
+                    if img_scontrino:
+                        instance.img_scontrino = img_scontrino
+                        instance.save()
             return redirect('RimborsiApp:missione', id)
         else:
             return HttpResponseServerError('Form non valido')
     else:
-        raise Http404
+        return HttpResponseBadRequest()
 
+# @login_required
+# def salva_convegni(request, id):
+#     if request.method == 'POST':
+#         missione = Missione.objects.get(user=request.user, id=id)
+#         convegni_formset = scontrino_extra_formset(request.POST, prefix='convegni')
+#         if convegni_formset.is_valid():
+#             convegni = [f.cleaned_data for f in convegni_formset.forms if f.cleaned_data != {}
+#                         and not f.cleaned_data['DELETE']]
+#             missione.convegno = json.dumps(convegni, cls=DjangoJSONEncoder)
+#             missione.save()
+#             return redirect('RimborsiApp:missione', id)
+#         else:
+#             return HttpResponseServerError('Form non valido')
+#     else:
+#         raise Http404
 
 @login_required
 def salva_convegni(request, id):
     if request.method == 'POST':
         missione = Missione.objects.get(user=request.user, id=id)
-        convegni_formset = scontrino_extra_formset(request.POST, prefix='convegni')
+        convegni_formset = spesa_formset(request.POST, request.FILES, prefix='convegni')
         if convegni_formset.is_valid():
-            convegni = [f.cleaned_data for f in convegni_formset.forms if f.cleaned_data != {}
-                        and not f.cleaned_data['DELETE']]
-            missione.convegno = json.dumps(convegni, cls=DjangoJSONEncoder)
-            missione.save()
+            for form in convegni_formset.forms:
+                if form.cleaned_data.get('DELETE'):
+                    form.instance.delete()
+                    SpesaMissione.objects.filter(spesa=form.instance).delete()
+                else:
+                    img_scontrino = form.instance.img_scontrino
+                    form.instance.img_scontrino = None
+                    instance = form.save(commit=False)
+                    instance.save()
+                    SpesaMissione.objects.update_or_create(missione=missione, spesa=instance, tipo='CONVEGNO')
+                    if img_scontrino:
+                        instance.img_scontrino = img_scontrino
+                        instance.save()
             return redirect('RimborsiApp:missione', id)
         else:
             return HttpResponseServerError('Form non valido')
     else:
-        raise Http404
-
+        return HttpResponseBadRequest()
 
 @login_required
 def cancella_missione(request, id):

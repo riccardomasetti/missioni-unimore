@@ -280,9 +280,11 @@ class Missione(models.Model):
 
     scontrino = models.TextField(null=True, blank=True)
     #pernottamento = models.TextField(null=True, blank=True)
-    pernottamenti = models.ManyToManyField(Spesa, through='SpesaMissione')
-    convegno = models.TextField(null=True, blank=True)
-    altrespese = models.TextField(null=True, blank=True)
+    pernottamenti = models.ManyToManyField(Spesa, through='PernottamentoMissione', related_name='pernottamenti_missioni')
+    #convegno = models.TextField(null=True, blank=True)
+    convegni = models.ManyToManyField(Spesa, through='ConvegnoMissione', related_name='convegni_missioni')
+    #altrespese = models.TextField(null=True, blank=True)
+    altre_spese = models.ManyToManyField(Spesa, through='AltreSpeseMissione', related_name='altrespese_missioni')
 
     mezzi_previsti = models.CharField(max_length=100, null=True, blank=True)
     motivazione_automobile = models.CharField(max_length=200, null=True, blank=True)
@@ -314,6 +316,17 @@ class SpesaMissione(models.Model):
         verbose_name = "Spesa Missione"
         verbose_name_plural = "Spese Missione"
 
+class PernottamentoMissione(SpesaMissione):
+    class Meta:
+        proxy = True  # Usa un proxy per creare una classe che si comporta come SpesaMissione ma è trattata come una classe separata in Django
+
+class ConvegnoMissione(SpesaMissione):
+    class Meta:
+        proxy = True
+
+class AltreSpeseMissione(SpesaMissione):
+    class Meta:
+        proxy = True
 
 class Trasporto(models.Model):
     missione = models.ForeignKey(Missione, on_delete=models.CASCADE)

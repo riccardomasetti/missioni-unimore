@@ -51,6 +51,58 @@ def migra_pernottamenti():
                         tipo="PERNOTTAMENTO"
                     )
 
+def migra_altre_spese():
+    missioni = Missione.objects.all()
+
+    for missione in missioni:
+        if missione.altrespese:
+            altre_spese = json.loads(missione.altrespese)
+            for altrespese in altre_spese:
+                if not altrespese.get("DELETE", False):
+                    data = dt.strptime(altrespese["data"], '%Y-%m-%d').date()
+                    importo = float(altrespese["s1"])
+                    valuta = altrespese["v1"]
+                    descrizione = altrespese.get("d1", "")
+
+                    spesa = Spesa.objects.create(
+                        data=data,
+                        importo=importo,
+                        valuta=valuta,
+                        descrizione=descrizione
+                    )
+
+                    SpesaMissione.objects.create(
+                        missione=missione,
+                        spesa=spesa,
+                        tipo="ALTRO"
+                    )
+
+def migra_convegni():
+    missioni = Missione.objects.all()
+
+    for missione in missioni:
+        if missione.convegno:
+            convegni = json.loads(missione.convegno)
+            for convegno in convegni:
+                if not convegno.get("DELETE", False):
+                    data = dt.strptime(convegno["data"], '%Y-%m-%d').date()
+                    importo = float(convegno["s1"])
+                    valuta = convegno["v1"]
+                    descrizione = convegno.get("d1", "")
+
+                    spesa = Spesa.objects.create(
+                        data=data,
+                        importo=importo,
+                        valuta=valuta,
+                        descrizione=descrizione
+                    )
+
+                    SpesaMissione.objects.create(
+                        missione=missione,
+                        spesa=spesa,
+                        tipo="CONVEGNO"
+                    )
+
 
 def get_prezzo_carburante():
     # Set the URL you want to webscrape from
@@ -86,4 +138,6 @@ def download(request, id, field):
 
 
 if __name__ == "__main__":
-    migra_pernottamenti()
+    #migra_pernottamenti()
+    #migra_convegni()
+    migra_altre_spese()
