@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.forms.models import formset_factory, inlineformset_factory, modelformset_factory
 
 from .models import *
-from .widgets import CustomClearableFileInput
+from .widgets import CustomClearableFileInput, PastiCustomClearableFileInput
 
 class ForeignProfileForm(forms.ModelForm):
     nome = forms.CharField(max_length=30, label='Name')
@@ -253,7 +253,7 @@ class MissioneForm(forms.ModelForm):
     class Meta:
         model = Missione
         fields = '__all__'
-        exclude = ('user', 'scontrino', 'pernottamento', 'pernottamenti', 'altrespese')
+        exclude = ('user', 'scontrino', 'pernottamento', 'pernottamenti', 'altrespese', 'altre_spese', 'convegni' )
 
         widgets = {
             'inizio': forms.DateInput(attrs={'type': 'date'}),
@@ -364,12 +364,45 @@ class ScontrinoExtraForm(forms.Form):
     d1 = forms.CharField(required=False, label=desc_label,
                          widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }), )
 
+class PastiForm(forms.ModelForm):
+    class Meta:
+        model = Pasti
+        fields = '__all__'
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}),
+            'importo1': forms.NumberInput(attrs={'class': 'form-control form-control-sm'}),
+            'valuta1': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'descrizione1': forms.TextInput(attrs={'class': 'form-control form-control-sm'}),
+            'img_scontrino1': PastiCustomClearableFileInput(attrs={'class': 'form-control form-control-sm'}),
+            'importo2': forms.NumberInput(attrs={'class': 'form-control form-control-sm'}),
+            'valuta2': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'descrizione2': forms.TextInput(attrs={'class': 'form-control form-control-sm'}),
+            'img_scontrino2': PastiCustomClearableFileInput(attrs={'class': 'form-control form-control-sm'}),
+            'importo3': forms.NumberInput(attrs={'class': 'form-control form-control-sm'}),
+            'valuta3': forms.Select(attrs={'class': 'form-control form-control-sm'}),
+            'descrizione3': forms.TextInput(attrs={'class': 'form-control form-control-sm'}),
+            'img_scontrino3': PastiCustomClearableFileInput(attrs={'class': 'form-control form-control-sm'}),
+        }
+        labels = {
+            'data': 'Data',
+            'importo1': 'Importo',
+            'valuta1': 'Valuta',
+            'descrizione1': 'Descrizione',
+            'img_scontrino1': 'Immagine Scontrino',
+            'importo2': 'Importo',
+            'valuta2': 'Valuta',
+            'descrizione2': 'Descrizione',
+            'img_scontrino2': 'Immagine Scontrino',
+            'importo3': 'Importo',
+            'valuta3': 'Valuta',
+            'descrizione3': 'Descrizione',
+            'img_scontrino3': 'Immagine Scontrino',
+        }
 
 class SpesaForm(forms.ModelForm):
     class Meta:
         model = Spesa
         fields ='__all__'
-        #fields = ['data', 'importo', 'valuta', 'descrizione', 'img_scontrino']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm', 'required': 'required',}),
             'importo': forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'required': 'required',}),
@@ -560,13 +593,6 @@ trasporto_formset = inlineformset_factory(Missione, Trasporto, TrasportoForm, ex
                                           fields='__all__', min_num=1)
 scontrino_formset = formset_factory(ScontrinoForm, extra=0)
 scontrino_extra_formset = formset_factory(ScontrinoExtraForm, can_delete=True, extra=0, min_num=1)
-
-#spesa_formset = inlineformset_factory(SpesaMissione, Spesa, form=SpesaForm, extra=1, can_delete=True,
-#                                     fk_name='spesa')
-
-spesa_formset = modelformset_factory(
-    Spesa,
-    form=SpesaForm,
-    extra=0,
-    can_delete=True, min_num=1
-)
+spesa_formset = modelformset_factory(Spesa, form=SpesaForm, extra=0, can_delete=True, min_num=1)
+pasto_formset = inlineformset_factory(Missione, Pasti, PastiForm, extra=0, can_delete=True,
+                                       min_num=1)

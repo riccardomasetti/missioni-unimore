@@ -22,7 +22,7 @@ from datetime import datetime as dt                 #avoiding conflicts
 
 
 
-from RimborsiApp.models import Spesa, SpesaMissione
+from RimborsiApp.models import Spesa, SpesaMissione, Pasti
 
 
 def migra_pernottamenti():
@@ -103,6 +103,40 @@ def migra_convegni():
                         tipo="CONVEGNO"
                     )
 
+def migra_pasti():
+    missioni = Missione.objects.all()
+
+    for missione in missioni:
+        if missione.scontrino:
+            pasti = json.loads(missione.scontrino)
+            for pasto in pasti:
+                if not pasto.get("DELETE", False):
+                    data = dt.strptime(pasto["data"], '%Y-%m-%d').date()
+                    importo1 = float(pasto["s1"]) if pasto.get("s1") is not None else None
+                    valuta1 = pasto.get("v1", "EUR")
+                    descrizione1 = pasto.get("d1", "")
+
+                    importo2 = float(pasto["s2"]) if pasto.get("s2") is not None else None
+                    valuta2 = pasto.get("v2", "EUR")
+                    descrizione2 = pasto.get("d2", "")
+
+                    importo3 = float(pasto["s3"]) if pasto.get("s3") is not None else None
+                    valuta3 = pasto.get("v3", "EUR")
+                    descrizione3 = pasto.get("d3", "")
+
+                    Pasti.objects.create(
+                        missione=missione,
+                        data=data,
+                        importo1=importo1,
+                        valuta1=valuta1,
+                        descrizione1=descrizione1,
+                        importo2=importo2,
+                        valuta2=valuta2,
+                        descrizione2=descrizione2,
+                        importo3=importo3,
+                        valuta3=valuta3,
+                        descrizione3=descrizione3
+                    )
 
 def get_prezzo_carburante():
     # Set the URL you want to webscrape from
@@ -140,4 +174,5 @@ def download(request, id, field):
 if __name__ == "__main__":
     #migra_pernottamenti()
     #migra_convegni()
-    migra_altre_spese()
+    #migra_altre_spese()
+    migra_pasti()

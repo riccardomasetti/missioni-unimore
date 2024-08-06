@@ -13,7 +13,7 @@
         {% crispy missione_form %}
 
         <h3>Pasti:</h3>
-        <form action="{% url 'RimborsiApp:salva_pasti' id=missione.id %}" method="post"> {% csrf_token %}
+        <form action="{% url 'RimborsiApp:salva_pasti' id=missione.id %}" method="post" enctype="multipart/form-data"> {% csrf_token %}
             {{ pasti_formset.management_form }}
             <div id="pasti-formset-container">
                 {% for form in pasti_formset.forms %}
@@ -21,16 +21,20 @@
                          style="background-color: whitesmoke; padding: 15px; border: 1px solid #ccc;">
                         {% for field in form.visible_fields %}
                             <div class="form-group mx-1 ">
-                                <label for="{{ field.id_for_label }}">{{ field.label|capfirst }}</label>
-                                {{ field.errors.as_ul }}
-                                {{ field }}
-                                </div>
+                                {% if forloop.first %}
+                                    {% for hidden in form.hidden_fields %}
+                                            {{ hidden }}
+                                    {% endfor %}
+                                {% endif %}
+                                {% if field.name == 'img_scontrino1' or field.name == 'img_scontrino2' or field.name == 'img_scontrino3' %}
+                                    {{ field }}
+                                {% else %}
+                                    <label for="{{ field.id_for_label }}">{{ field.label|capfirst }}</label>
+                                    {{ field.errors.as_ul }}
+                                    {{ field }}
+                                {% endif %}
+                            </div>
                         {% endfor %}
-                        {% if forloop.first %}
-                            {% for hidden in form.hidden_fields %}
-                                    {{ hidden }}
-                            {% endfor %}
-                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -188,7 +192,7 @@
         $('.pasti_formset_row').formset({
             addText: 'Aggiungi',
             deleteText: 'Elimina',
-            prefix: 'pasti',
+            prefix: 'pasti_set',
             ifdelete: false,
             formCssClass: 'dynamic-formset1',
         });

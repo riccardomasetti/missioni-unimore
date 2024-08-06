@@ -174,7 +174,7 @@
                     if (elem.is('input:checkbox') || elem.is('input:radio')) {
                         elem.attr('checked', false);
                     } else if (elem.is('input:file')) {
-                        //rimozione degli elementi del template.
+                        //remove template elements.
                         elem.val('');
                         elem.siblings('.file-name').text('No Selected File');
                         elem.siblings('a').remove();

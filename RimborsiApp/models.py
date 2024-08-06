@@ -249,13 +249,22 @@ def profile_type_path(instance, filename):
     user_id = spesa_missione.missione.user.id if spesa_missione else 'unknown_user'
     id_missione = spesa_missione.missione.id if spesa_missione else 'unknown_mission'
     return f'users/{user_id}/{id_missione}/{tipo_scontrino}/{filename}'
+
+#vedi se puoi unire trasporti_path e pasti_path
+def trasporti_path(instance, filename):
+    user_id = instance.missione.user.id if instance else 'unknown_user'
+    id_missione = instance.missione.id if instance else 'unknown_mission'
+    return f'users/{user_id}/{id_missione}/TRASPORTO/{filename}'
+
+def pasti_path(instance, filename):
+    user_id = instance.missione.user.id if instance else 'unknown_user'
+    id_missione = instance.missione.id if instance else 'unknown_mission'
+    return f'users/{user_id}/{id_missione}/PASTO/{filename}'
 class Spesa(models.Model):
     data = models.DateField()
     importo = models.FloatField()
     valuta = models.CharField(max_length=3, choices=VALUTA_CHOICES, default="EUR")
     descrizione = models.CharField(max_length=100, null=True, blank=True)
-    #delete = models.BooleanField()
-    #img_scontrino = models.ImageField(upload_to='spese/', null=True, blank=True)
     img_scontrino = models.ImageField(upload_to=profile_type_path, null=True, blank=True)
     class Meta:
         verbose_name = "Spesa"
@@ -278,7 +287,8 @@ class Missione(models.Model):
     tipo = models.CharField(max_length=8, choices=TIPO_MISSIONE_CHOICES, null=True)
     anticipo = models.FloatField(null=True, blank=True, default=0)
 
-    scontrino = models.TextField(null=True, blank=True)
+    #scontrino = models.TextField(null=True, blank=True)
+    #pasti = models.ManyToManyField(Spesa, through='PastiMissione', related_name='pasti_missioni')
     #pernottamento = models.TextField(null=True, blank=True)
     pernottamenti = models.ManyToManyField(Spesa, through='PernottamentoMissione', related_name='pernottamenti_missioni')
     #convegno = models.TextField(null=True, blank=True)
@@ -318,8 +328,7 @@ class SpesaMissione(models.Model):
 
 class PernottamentoMissione(SpesaMissione):
     class Meta:
-        proxy = True  # Usa un proxy per creare una classe che si comporta come SpesaMissione ma è trattata come una classe separata in Django
-
+        proxy = True
 class ConvegnoMissione(SpesaMissione):
     class Meta:
         proxy = True
@@ -327,6 +336,30 @@ class ConvegnoMissione(SpesaMissione):
 class AltreSpeseMissione(SpesaMissione):
     class Meta:
         proxy = True
+
+class Pasti(models.Model):
+    missione = models.ForeignKey(Missione, on_delete=models.CASCADE)
+
+    data = models.DateField()
+
+    importo1 = models.FloatField(null=True, blank=True)
+    valuta1 = models.CharField(max_length=3, choices=VALUTA_CHOICES, default='EUR')
+    descrizione1 = models.CharField(max_length=255, null=True, blank=True)
+    img_scontrino1 = models.ImageField(upload_to=pasti_path, null=True, blank=True)
+
+    importo2 = models.FloatField(null=True, blank=True)
+    valuta2 = models.CharField(max_length=3, choices=VALUTA_CHOICES, default='EUR')
+    descrizione2 = models.CharField(max_length=255, null=True, blank=True)
+    img_scontrino2 = models.ImageField(upload_to=pasti_path, null=True, blank=True)
+
+    importo3 = models.FloatField(null=True, blank=True)
+    valuta3 = models.CharField(max_length=3, choices=VALUTA_CHOICES, default='EUR')
+    descrizione3 = models.CharField(max_length=255, null=True, blank=True)
+    img_scontrino3 = models.ImageField(upload_to=pasti_path, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Pasto"
+        verbose_name_plural = "Pasti"
 
 class Trasporto(models.Model):
     missione = models.ForeignKey(Missione, on_delete=models.CASCADE)
@@ -338,7 +371,7 @@ class Trasporto(models.Model):
     costo = models.FloatField()
     valuta = models.CharField(max_length=3, choices=VALUTA_CHOICES, default="EUR")
     km = models.FloatField(null=True, blank=True)
-    img_scontrino = models.ImageField(upload_to='trasporti/', null=True, blank=True)
+    img_scontrino = models.ImageField(upload_to=trasporti_path, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Trasporti"

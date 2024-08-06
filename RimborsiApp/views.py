@@ -101,10 +101,10 @@ def resoconto_data(missione):
     eur = 'EUR'
 
     db_dict = {
-        'scontrino': [('s1', 'v1'), ('s2', 'v2'), ('s3', 'v3')],
-        'pernottamento': [('s1', 'v1')],
-        'convegno': [('s1', 'v1')],
-        'altrespese': [('s1', 'v1')],
+        #'scontrino': [('s1', 'v1'), ('s2', 'v2'), ('s3', 'v3')],
+        #'pernottamento': [('s1', 'v1')],
+        #'convegno': [('s1', 'v1')],
+        #'altrespese': [('s1', 'v1')],
     }
 
     totali_base = {
@@ -117,6 +117,13 @@ def resoconto_data(missione):
         'totale': 0.,
         'totale_indennita': 0.,
         'totale_indennita_anticipo': 0.,
+    }
+
+    tipo_to_key = {
+        'PERNOTTAMENTO': 'pernottamento',
+        'CONVEGNO': 'convegno',
+        'ALTRO': 'altrespese',
+        'PASTO': 'pasti',
     }
 
     totali = {}
@@ -140,6 +147,46 @@ def resoconto_data(missione):
                 totali[entry[v]][k] += float(entry[s] or 0.)
                 if entry[v] != eur:
                     totali_convert[entry[v]][k] += money_exchange(entry['data'], entry[v], float(entry[s] or 0.))
+
+    def add_spesa(spesa, tipo):
+        key = tipo_to_key.get(tipo)
+        if not key:
+            raise KeyError(f"Tipo di spesa non valido: {tipo}")
+
+        valuta = spesa.valuta or eur
+        costo = float(spesa.importo or 0.)
+
+        if totali.get(valuta) is None:
+            totali[valuta] = totali_base.copy()
+            if valuta != eur:
+                totali_convert[valuta] = totali_base.copy()
+
+        totali[valuta][key] += costo
+        if valuta != eur:
+            totali_convert[valuta][key] += money_exchange(spesa.data, valuta, costo)
+
+    def add_pasti(pasti_set):
+        for entry in pasti_set:
+            for i in range(1, 4):   # ciclo 3 volte (un ciclo per ogni importo)
+                importo = getattr(entry, f'importo{i}')
+                valuta = getattr(entry, f'valuta{i}') or eur
+                costo = float(importo or 0.)
+
+                if totali.get(valuta) is None:
+                    totali[valuta] = totali_base.copy()
+                    if valuta != eur:
+                        totali_convert[valuta] = totali_base.copy()
+
+                totali[valuta]['scontrino'] += costo
+                if valuta != eur:
+                    totali_convert[valuta]['scontrino'] += money_exchange(entry.data, valuta, costo)
+
+    # Aggiungo le spese associate alla missione tramite SpesaMissione
+    for spesa_missione in SpesaMissione.objects.filter(missione=missione):
+        add_spesa(spesa_missione.spesa, spesa_missione.tipo)
+
+    # Aggiungi le spese dei pasti
+    add_pasti(missione.pasti_set.all())
 
     # Aggiungo il trasporto
     for v in totali.keys():
@@ -371,17 +418,40 @@ def clona_missione(request, id):
         return HttpResponseNotFound()
 
     trasporti = Trasporto.objects.filter(missione=missione)
+    pasti = Pasti.objects.filter(missione=missione)
+    pernottamenti = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Pernottamento')
+    convegni = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Convegno')
+    altre_spese = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Altro')
 
     if request.method == 'GET':
         missione.id = None
         missione.missione_conclusa = False
         missione.save()
 
-
         for t in trasporti:
             t.id = None
             t.missione = missione
             t.save()
+
+        for p in pasti:
+            p.id = None
+            p.missione = missione
+            p.save()
+
+        for p in pernottamenti:
+            p.id = None
+            p.save()
+            SpesaMissione.objects.create(missione=missione, spesa=p, tipo='PERNOTTAMENTO')
+
+        for c in convegni:
+            c.id = None
+            c.save()
+            SpesaMissione.objects.create(missione=missione, spesa=c, tipo='CONVEGNO')
+
+        for a in altre_spese:
+            a.id = None
+            a.save()
+            SpesaMissione.objects.create(missione=missione, spesa=a, tipo='ALTRO')
 
         return redirect('RimborsiApp:lista_missioni')
     else:
@@ -412,7 +482,7 @@ def missione(request, id):
         missione_form.helper.form_action = reverse('RimborsiApp:missione', args=[id])
 
         db_dict = {
-            'scontrino': [],  # pasti
+           # 'scontrino': [],  # pasti
            # 'pernottamento': [],
            # 'convegno': [],
            # 'altrespese': [],
@@ -423,22 +493,33 @@ def missione(request, id):
             db_dict[k] = load_json(missione, k)
 
         # Create list of days for each meal
-        giorni = (missione.fine - missione.inizio).days
-        for current_date in (missione.inizio + datetime.timedelta(n) for n in range(giorni + 1)):
-            if not list(filter(lambda d: d['data'] == current_date, db_dict['scontrino'])):
-                db_dict['scontrino'].append({'data': current_date,
-                                             's1': None, 'v1': "EUR", 'd1': None,
-                                             's2': None, 'v2': "EUR", 'd2': None,
-                                             's3': None, 'v3': "EUR", 'd3': None,
-                                             })
+        # giorni = (missione.fine - missione.inizio).days
+        # for current_date in (missione.inizio + datetime.timedelta(n) for n in range(giorni + 1)):
+        #     if not list(filter(lambda d: d['data'] == current_date, db_dict['scontrino'])):
+        #         db_dict['scontrino'].append({'data': current_date,
+        #                                      's1': None, 'v1': "EUR", 'd1': None,
+        #                                      's2': None, 'v2': "EUR", 'd2': None,
+        #                                      's3': None, 'v3': "EUR", 'd3': None,
+        #                                      })
         # Order by date and create the formset
-        pasti_sorted = sorted(db_dict['scontrino'], key=lambda k: k['data'])
-        pasti_formset = scontrino_formset(initial=pasti_sorted, prefix='pasti')
+        # pasti_sorted = sorted(db_dict['scontrino'], key=lambda k: k['data'])
+        # pasti_formset = scontrino_formset(initial=pasti_sorted, prefix='pasti')
+
+        pasti_qs = Pasti.objects.filter(missione=missione).order_by('data')
+        giorni = (missione.fine - missione.inizio).days
+        all_dates = [missione.inizio + datetime.timedelta(n) for n in range(giorni + 1)]
+        existing_pasti_dates = {pasto.data for pasto in pasti_qs}
+        missing_dates = [date for date in all_dates if date not in existing_pasti_dates]
+
+        for date in missing_dates:
+            Pasti.objects.create(missione=missione, data=date)
+
+        #pasti_qs = Pasti.objects.filter(missione=missione)
+        pasti_formset = pasto_formset(instance=missione ,queryset=pasti_qs)
 
         #pernottamenti_sorted = sorted(db_dict['pernottamento'], key=lambda k: k['data'])
         #pernottamenti_formset = scontrino_extra_formset(initial=pernottamenti_sorted, prefix='pernottamenti')
 
-        # Caricare il formset per pernottamenti
         pernottamenti_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Pernottamento')
         pernottamenti_formset = spesa_formset(queryset=pernottamenti_qs.order_by('data'), prefix='pernottamenti')
 
@@ -491,20 +572,33 @@ def missione(request, id):
         raise Http404
 
 
+# @login_required
+# def salva_pasti(request, id):
+#     if request.method == 'POST':
+#         missione = Missione.objects.get(user=request.user, id=id)
+#         pasti_formset = scontrino_formset(request.POST, prefix='pasti')
+#         if pasti_formset.is_valid():
+#             pasti = [f.cleaned_data for f in pasti_formset.forms]
+#             missione.scontrino = json.dumps(pasti, cls=DjangoJSONEncoder)
+#             missione.save()
+#             return redirect('RimborsiApp:missione', id)
+#         else:
+#             return HttpResponseServerError('Form non valido')
+#     else:
+#         raise Http404
+
 @login_required
 def salva_pasti(request, id):
     if request.method == 'POST':
-        missione = Missione.objects.get(user=request.user, id=id)
-        pasti_formset = scontrino_formset(request.POST, prefix='pasti')
+        missione = Missione.objects.get(id=id)
+        pasti_formset = pasto_formset(request.POST, request.FILES, instance=missione)
         if pasti_formset.is_valid():
-            pasti = [f.cleaned_data for f in pasti_formset.forms]
-            missione.scontrino = json.dumps(pasti, cls=DjangoJSONEncoder)
-            missione.save()
+            pasti_formset.save()
             return redirect('RimborsiApp:missione', id)
         else:
             return HttpResponseServerError('Form non valido')
     else:
-        raise Http404
+        return HttpResponseBadRequest()
 
 #per commentare blocco: Ctrl + Alt + /
 # @login_required
