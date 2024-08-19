@@ -492,19 +492,6 @@ def missione(request, id):
         for k, _ in db_dict.items():
             db_dict[k] = load_json(missione, k)
 
-        # Create list of days for each meal
-        # giorni = (missione.fine - missione.inizio).days
-        # for current_date in (missione.inizio + datetime.timedelta(n) for n in range(giorni + 1)):
-        #     if not list(filter(lambda d: d['data'] == current_date, db_dict['scontrino'])):
-        #         db_dict['scontrino'].append({'data': current_date,
-        #                                      's1': None, 'v1': "EUR", 'd1': None,
-        #                                      's2': None, 'v2': "EUR", 'd2': None,
-        #                                      's3': None, 'v3': "EUR", 'd3': None,
-        #                                      })
-        # Order by date and create the formset
-        # pasti_sorted = sorted(db_dict['scontrino'], key=lambda k: k['data'])
-        # pasti_formset = scontrino_formset(initial=pasti_sorted, prefix='pasti')
-
         pasti_qs = Pasti.objects.filter(missione=missione).order_by('data')
         giorni = (missione.fine - missione.inizio).days
         all_dates = [missione.inizio + datetime.timedelta(n) for n in range(giorni + 1)]
@@ -514,11 +501,7 @@ def missione(request, id):
         for date in missing_dates:
             Pasti.objects.create(missione=missione, data=date)
 
-        #pasti_qs = Pasti.objects.filter(missione=missione)
         pasti_formset = pasto_formset(instance=missione ,queryset=pasti_qs)
-
-        #pernottamenti_sorted = sorted(db_dict['pernottamento'], key=lambda k: k['data'])
-        #pernottamenti_formset = scontrino_extra_formset(initial=pernottamenti_sorted, prefix='pernottamenti')
 
         pernottamenti_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Pernottamento')
         pernottamenti_formset = spesa_formset(queryset=pernottamenti_qs.order_by('data'), prefix='pernottamenti')
@@ -526,14 +509,8 @@ def missione(request, id):
         trasporti = Trasporto.objects.filter(missione=missione)
         trasporti_formset = trasporto_formset(instance=missione, queryset=trasporti.order_by('data'))
 
-        #convegni_sorted = sorted(db_dict['convegno'], key=lambda k: k['data'])
-        #convegni_formset = scontrino_extra_formset(initial=convegni_sorted, prefix='convegni')
-
         convegni_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Convegno')
         convegni_formset = spesa_formset(queryset=convegni_qs.order_by('data'), prefix='convegni')
-
-        #altrespese_sorted = sorted(db_dict['altrespese'], key=lambda k: k['data'])
-        #altrespese_formset = scontrino_extra_formset(initial=altrespese_sorted, prefix='altrespese')
 
         altrespese_qs = Spesa.objects.filter(spesamissione__missione=missione, spesamissione__tipo='Altro')
         altrespese_formset = spesa_formset(queryset=altrespese_qs.order_by('data'), prefix='altrespese')
@@ -558,9 +535,7 @@ def missione(request, id):
         response = missione_response(missione)
         return render(request, 'Rimborsi/missione.html', response)
     elif request.method == 'POST':
-        # missione = Missione.objects.get(user=request.user, id=id)
         missione_form = MissioneForm(request.user, request.POST, instance=missione)
-        # missione_form = MissioneForm(request.user, request.POST)
         if missione_form.is_valid():
             missione_form.save()
             return redirect('RimborsiApp:missione', id)
@@ -571,21 +546,6 @@ def missione(request, id):
     else:
         raise Http404
 
-
-# @login_required
-# def salva_pasti(request, id):
-#     if request.method == 'POST':
-#         missione = Missione.objects.get(user=request.user, id=id)
-#         pasti_formset = scontrino_formset(request.POST, prefix='pasti')
-#         if pasti_formset.is_valid():
-#             pasti = [f.cleaned_data for f in pasti_formset.forms]
-#             missione.scontrino = json.dumps(pasti, cls=DjangoJSONEncoder)
-#             missione.save()
-#             return redirect('RimborsiApp:missione', id)
-#         else:
-#             return HttpResponseServerError('Form non valido')
-#     else:
-#         raise Http404
 
 @login_required
 def salva_pasti(request, id):
@@ -599,23 +559,6 @@ def salva_pasti(request, id):
             return HttpResponseServerError('Form non valido')
     else:
         return HttpResponseBadRequest()
-
-#per commentare blocco: Ctrl + Alt + /
-# @login_required
-# def salva_pernottamenti(request, id):
-#     if request.method == 'POST':
-#         missione = Missione.objects.get(user=request.user, id=id)
-#         pernottamenti_formset = scontrino_extra_formset(request.POST, prefix='pernottamenti')
-#         if pernottamenti_formset.is_valid():
-#             pernottamenti = [f.cleaned_data for f in pernottamenti_formset.forms if f.cleaned_data != {}
-#                              and not f.cleaned_data['DELETE']]
-#             missione.pernottamento = json.dumps(pernottamenti, cls=DjangoJSONEncoder)
-#             missione.save()
-#             return redirect('RimborsiApp:missione', id)
-#         else:
-#             return HttpResponseServerError('Form non valido')
-#     else:
-#         raise Http404
 
 @login_required
 def salva_pernottamenti(request, id):
@@ -656,22 +599,6 @@ def salva_trasporti(request, id):
         return HttpResponseBadRequest()
 
 
-# @login_required
-# def salva_altrespese(request, id):
-#     if request.method == 'POST':
-#         missione = Missione.objects.get(user=request.user, id=id)
-#         altrespese_formset = scontrino_extra_formset(request.POST, prefix='altrespese')
-#         if altrespese_formset.is_valid():
-#             altrespese = [f.cleaned_data for f in altrespese_formset.forms if f.cleaned_data != {}
-#                           and not f.cleaned_data['DELETE']]
-#             missione.altrespese = json.dumps(altrespese, cls=DjangoJSONEncoder)
-#             missione.save()
-#             return redirect('RimborsiApp:missione', id)
-#         else:
-#             return HttpResponseServerError('Form non valido')
-#     else:
-#         raise Http404
-
 @login_required
 def salva_altrespese(request, id):
     if request.method == 'POST':
@@ -696,22 +623,6 @@ def salva_altrespese(request, id):
             return HttpResponseServerError('Form non valido')
     else:
         return HttpResponseBadRequest()
-
-# @login_required
-# def salva_convegni(request, id):
-#     if request.method == 'POST':
-#         missione = Missione.objects.get(user=request.user, id=id)
-#         convegni_formset = scontrino_extra_formset(request.POST, prefix='convegni')
-#         if convegni_formset.is_valid():
-#             convegni = [f.cleaned_data for f in convegni_formset.forms if f.cleaned_data != {}
-#                         and not f.cleaned_data['DELETE']]
-#             missione.convegno = json.dumps(convegni, cls=DjangoJSONEncoder)
-#             missione.save()
-#             return redirect('RimborsiApp:missione', id)
-#         else:
-#             return HttpResponseServerError('Form non valido')
-#     else:
-#         raise Http404
 
 @login_required
 def salva_convegni(request, id):

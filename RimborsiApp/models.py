@@ -286,14 +286,8 @@ class Missione(models.Model):
     automobile_altrui = models.CharField(max_length=100, null=True, blank=True)
     tipo = models.CharField(max_length=8, choices=TIPO_MISSIONE_CHOICES, null=True)
     anticipo = models.FloatField(null=True, blank=True, default=0)
-
-    #scontrino = models.TextField(null=True, blank=True)
-    #pasti = models.ManyToManyField(Spesa, through='PastiMissione', related_name='pasti_missioni')
-    #pernottamento = models.TextField(null=True, blank=True)
     pernottamenti = models.ManyToManyField(Spesa, through='PernottamentoMissione', related_name='pernottamenti_missioni')
-    #convegno = models.TextField(null=True, blank=True)
     convegni = models.ManyToManyField(Spesa, through='ConvegnoMissione', related_name='convegni_missioni')
-    #altrespese = models.TextField(null=True, blank=True)
     altre_spese = models.ManyToManyField(Spesa, through='AltreSpeseMissione', related_name='altrespese_missioni')
 
     mezzi_previsti = models.CharField(max_length=100, null=True, blank=True)
@@ -339,19 +333,15 @@ class AltreSpeseMissione(SpesaMissione):
 
 class Pasti(models.Model):
     missione = models.ForeignKey(Missione, on_delete=models.CASCADE)
-
     data = models.DateField()
-
     importo1 = models.FloatField(null=True, blank=True)
     valuta1 = models.CharField(max_length=3, choices=VALUTA_CHOICES, default='EUR')
     descrizione1 = models.CharField(max_length=255, null=True, blank=True)
     img_scontrino1 = models.ImageField(upload_to=pasti_path, null=True, blank=True)
-
     importo2 = models.FloatField(null=True, blank=True)
     valuta2 = models.CharField(max_length=3, choices=VALUTA_CHOICES, default='EUR')
     descrizione2 = models.CharField(max_length=255, null=True, blank=True)
     img_scontrino2 = models.ImageField(upload_to=pasti_path, null=True, blank=True)
-
     importo3 = models.FloatField(null=True, blank=True)
     valuta3 = models.CharField(max_length=3, choices=VALUTA_CHOICES, default='EUR')
     descrizione3 = models.CharField(max_length=255, null=True, blank=True)

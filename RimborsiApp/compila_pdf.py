@@ -416,50 +416,6 @@ def compila_parte_2(request, id):
                 table.rows[row_index].height = Cm(0.61)
                 row_index += 1
 
-    # db_dict = {
-    #     'pernottamento': [],
-    #     'scontrino': [],  # pasti
-    #     'convegno': [],
-    #     'altrespese': [],
-    # }
-    #
-    # # Load the default values for each field in db_dict
-    # for k, _ in db_dict.items():
-    #     db_dict[k] = load_json(missione, k)
-    #
-    # # TODO Scontrino dovrebbe essere ordinato per data. Potrebbe essere un pacco.
-    # r_scontrino = []
-    # for row in db_dict['scontrino']:
-    #     if row['s1'] is not None:
-    #         r_scontrino.append({'data': row['data'], 's1': row['s1'], 'd1': row['d1'], 'v1': row['v1']})
-    #     if row['s2'] is not None:
-    #         r_scontrino.append({'data': row['data'], 's1': row['s2'], 'd1': row['d2'], 'v1': row['v2']})
-    #     if row['s3'] is not None:
-    #         r_scontrino.append({'data': row['data'], 's1': row['s3'], 'd1': row['d3'], 'v1': row['v3']})
-    # db_dict['scontrino'] = r_scontrino
-    #
-    # # Fill all the remaining tables
-    # for index, (key, value) in enumerate(db_dict.items(), start=1):
-    #     table = document.tables[index]
-    #
-    #     while len(table.rows) <= len(value):
-    #         row = table.add_row()
-    #         # row.height = Cm(0.61)
-    #
-    #     for i, t in enumerate(value, start=1):
-    #         s1 = float(t['s1'])
-    #         valuta = t['v1']
-    #         data = t['data']  #.strftime('%Y-%m-%d')
-    #         costo_str = f'{s1:.2f} {valuta}'
-    #         if valuta != 'EUR':
-    #             costo_in_euro = money_exchange(data, valuta, s1)
-    #             costo_str += f' ({costo_in_euro:.2f} EUR)'
-    #
-    #         table.cell(i, 0).text = t['data'].strftime('%d/%m/%Y')
-    #         table.cell(i, 1).text = t['d1'] if t['d1'] is not None else ''
-    #         table.cell(i, 2).text = costo_str
-    #         table.rows[i].height = Cm(0.61)
-
     output_name_tmp = os.path.join(moduli_output_path, f'Missione_{missione.id}_parte_2_tmp.docx')
     output_name = f'Missione_{missione.id}_parte_2.docx'
     document.save(os.path.join(moduli_output_path, output_name_tmp))
