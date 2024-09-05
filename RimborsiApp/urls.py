@@ -30,5 +30,14 @@ urlpatterns = [
 
     path('download/<int:id>/<str:field>', utils.download, name='download'),
 
+
+    path('media/users/<int:id1>/<int:id2>/<str:field1>/<str:field2>', utils.secure_media),
+    path('spese_image_preview/<int:id>', utils.spesa_image_preview, name='spese_image_preview'),
+
+
+    path('trasporti_image_preview/<int:id>', utils.trasporto_image_preview, name='trasporti_image_preview'),
+    path('pasto_image_preview/<int:id>/<str:img_field_name>/', utils.pasto_image_preview, name='pasto_image_preview'),
+
+
     path('statistiche', views.statistiche, name='statistiche'),
 ]
