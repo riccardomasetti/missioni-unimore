@@ -14,7 +14,7 @@ from docx.shared import Cm
 from reportlab.pdfgen import canvas
 
 from .forms import *
-from .views import load_json, money_exchange, resoconto_data
+from .views import  money_exchange, resoconto_data
 
 
 @login_required

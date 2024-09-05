@@ -316,32 +316,32 @@ class MissioneForm(forms.ModelForm):
 
 
 # Pasti
-class ScontrinoForm(forms.Form):
-    data = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}))
-    desc_label = 'Descrizione (numero fattura/ricevuta fiscale)'
-    s1 = forms.DecimalField(decimal_places=2, label='Spesa', required=False,
-                            widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
-    v1 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
-                           widget=forms.Select(
-                               attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
-    d1 = forms.CharField(required=False, label=desc_label,
-                         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }))
-
-    s2 = forms.DecimalField(decimal_places=2, label='Spesa', required=False,
-                            widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
-    v2 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
-                           widget=forms.Select(
-                               attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
-    d2 = forms.CharField(required=False, label=desc_label,
-                         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }))
-
-    s3 = forms.DecimalField(decimal_places=2, label='Spesa', required=False,
-                            widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
-    v3 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
-                           widget=forms.Select(
-                               attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
-    d3 = forms.CharField(required=False, label=desc_label,
-                         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }))
+# class ScontrinoForm(forms.Form):
+#     data = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-sm'}))
+#     desc_label = 'Descrizione (numero fattura/ricevuta fiscale)'
+#     s1 = forms.DecimalField(decimal_places=2, label='Spesa', required=False,
+#                             widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
+#     v1 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
+#                            widget=forms.Select(
+#                                attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
+#     d1 = forms.CharField(required=False, label=desc_label,
+#                          widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }))
+#
+#     s2 = forms.DecimalField(decimal_places=2, label='Spesa', required=False,
+#                             widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
+#     v2 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
+#                            widget=forms.Select(
+#                                attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
+#     d2 = forms.CharField(required=False, label=desc_label,
+#                          widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }))
+#
+#     s3 = forms.DecimalField(decimal_places=2, label='Spesa', required=False,
+#                             widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
+#     v3 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
+#                            widget=forms.Select(
+#                                attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
+#     d3 = forms.CharField(required=False, label=desc_label,
+#                          widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }))
 
     # def __init__(self, *args, **kwargs):
     #     super(ScontrinoForm, self).__init__(*args, **kwargs)
@@ -351,18 +351,18 @@ class ScontrinoForm(forms.Form):
 
 
 # Pernottamenti, iscrizione convegni, altre spese
-class ScontrinoExtraForm(forms.Form):
-    data = forms.DateField(
-        widget=forms.DateInput(
-            attrs={'type': 'date', 'class': 'form-control form-control-sm', 'required': 'required', }))
-    desc_label = 'Descrizione (numero fattura/ricevuta fiscale)'
-    s1 = forms.DecimalField(decimal_places=2, label='Spesa', required=True,
-                            widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
-    v1 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
-                           widget=forms.Select(
-                               attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
-    d1 = forms.CharField(required=False, label=desc_label,
-                         widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }), )
+# class ScontrinoExtraForm(forms.Form):
+#     data = forms.DateField(
+#         widget=forms.DateInput(
+#             attrs={'type': 'date', 'class': 'form-control form-control-sm', 'required': 'required', }))
+#     desc_label = 'Descrizione (numero fattura/ricevuta fiscale)'
+#     s1 = forms.DecimalField(decimal_places=2, label='Spesa', required=True,
+#                             widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm', }))
+#     v1 = forms.ChoiceField(initial="EUR", choices=VALUTA_CHOICES, required=False, label='Valuta',
+#                            widget=forms.Select(
+#                                attrs={'class': 'form-control form-control-sm', 'style': 'min-width: 55px;'}))
+#     d1 = forms.CharField(required=False, label=desc_label,
+#                          widget=forms.TextInput(attrs={'class': 'form-control form-control-sm', }), )
 
 class PastiForm(forms.ModelForm):
     class Meta:
@@ -591,8 +591,8 @@ automobile_formset = inlineformset_factory(User, Automobile, AutomobileForm, ext
                                            exclude=('user',), min_num=1)
 trasporto_formset = inlineformset_factory(Missione, Trasporto, TrasportoForm, extra=0, can_delete=True,
                                           fields='__all__', min_num=1)
-scontrino_formset = formset_factory(ScontrinoForm, extra=0)
-scontrino_extra_formset = formset_factory(ScontrinoExtraForm, can_delete=True, extra=0, min_num=1)
+# scontrino_formset = formset_factory(ScontrinoForm, extra=0)
+# scontrino_extra_formset = formset_factory(ScontrinoExtraForm, can_delete=True, extra=0, min_num=1)
 spesa_formset = modelformset_factory(Spesa, form=SpesaForm, extra=0, can_delete=True, min_num=1)
 pasto_formset = inlineformset_factory(Missione, Pasti, PastiForm, extra=0, can_delete=True,
                                        min_num=1)

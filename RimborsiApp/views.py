@@ -32,29 +32,29 @@ def lista_missioni(request):
     return render(request, 'Rimborsi/lista_missioni.html', {'missioni_attive': missioni_attive,
                                                             'missioni_concluse': missioni_concluse})
 
-def load_json(missione, field_name):
-    field_value = getattr(missione, field_name)
-    validated_db_field = []
-    if isinstance(field_value, str) and field_value != '':
-        db_field = json.loads(field_value, parse_float=decimal.Decimal)
-        cleaned = False
-        for d in db_field:
-            try:
-                d['data'] = datetime.datetime.strptime(d['data'], '%Y-%m-%d').date()
-                validated_db_field.append(d)
-            except:
-                # Normalmente non si possono avere scontrini senza data, ma può succedere che
-                # venga inserito uno scontrino per sbaglio e che questo non abbia la data, causando
-                # quindi un errore durante il parsing del json.
-                cleaned = True
-
-        if cleaned:
-            # Dovrerro ripulire anche il db in questo caso? E se uno avesse semplicemente dimenticato
-            # la data ma inserito spese valide?
-            # setattr(missione, field_name, validated_db_field)
-            pass
-
-    return validated_db_field
+# def load_json(missione, field_name):
+#     field_value = getattr(missione, field_name)
+#     validated_db_field = []
+#     if isinstance(field_value, str) and field_value != '':
+#         db_field = json.loads(field_value, parse_float=decimal.Decimal)
+#         cleaned = False
+#         for d in db_field:
+#             try:
+#                 d['data'] = datetime.datetime.strptime(d['data'], '%Y-%m-%d').date()
+#                 validated_db_field.append(d)
+#             except:
+#                 # Normalmente non si possono avere scontrini senza data, ma può succedere che
+#                 # venga inserito uno scontrino per sbaglio e che questo non abbia la data, causando
+#                 # quindi un errore durante il parsing del json.
+#                 cleaned = True
+#
+#         if cleaned:
+#             # Dovrerro ripulire anche il db in questo caso? E se uno avesse semplicemente dimenticato
+#             # la data ma inserito spese valide?
+#             # setattr(missione, field_name, validated_db_field)
+#             pass
+#
+#     return validated_db_field
 
 
 def money_exchange(data, valuta, cifra):
@@ -131,22 +131,22 @@ def resoconto_data(missione):
 
     totali[eur] = totali_base.copy()
 
-    # Sommo le spese per questa missione
-    for k, sub_dict in db_dict.items():
-        tmp = load_json(missione, k)
-        for entry in tmp:
-            for s, v in sub_dict:
-                if entry.get(v) is None:
-                    entry[v] = eur  # Questo serve per gestire le entry del db inserite prima di aggiungere la valuta
-
-                if totali.get(entry[v]) is None:
-                    totali[entry[v]] = totali_base.copy()
-                    if entry[v] != eur:
-                        totali_convert[entry[v]] = totali_base.copy()
-
-                totali[entry[v]][k] += float(entry[s] or 0.)
-                if entry[v] != eur:
-                    totali_convert[entry[v]][k] += money_exchange(entry['data'], entry[v], float(entry[s] or 0.))
+    # # Sommo le spese per questa missione
+    # for k, sub_dict in db_dict.items():
+    #     tmp = load_json(missione, k)
+    #     for entry in tmp:
+    #         for s, v in sub_dict:
+    #             if entry.get(v) is None:
+    #                 entry[v] = eur  # Questo serve per gestire le entry del db inserite prima di aggiungere la valuta
+    #
+    #             if totali.get(entry[v]) is None:
+    #                 totali[entry[v]] = totali_base.copy()
+    #                 if entry[v] != eur:
+    #                     totali_convert[entry[v]] = totali_base.copy()
+    #
+    #             totali[entry[v]][k] += float(entry[s] or 0.)
+    #             if entry[v] != eur:
+    #                 totali_convert[entry[v]][k] += money_exchange(entry['data'], entry[v], float(entry[s] or 0.))
 
     def add_spesa(spesa, tipo):
         key = tipo_to_key.get(tipo)
@@ -489,8 +489,8 @@ def missione(request, id):
         }
 
         # Load the default values for each field in db_dict
-        for k, _ in db_dict.items():
-            db_dict[k] = load_json(missione, k)
+        # for k, _ in db_dict.items():
+        #     db_dict[k] = load_json(missione, k)
 
         pasti_qs = Pasti.objects.filter(missione=missione).order_by('data')
         giorni = (missione.fine - missione.inizio).days
